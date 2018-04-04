@@ -1,0 +1,5 @@
+url: https://commons.wikimedia.org/wiki/File:DCT-16x16.png
+Author: devcore
+Date: 9 July 2015
+
+The image has been transformed into DCT_16_16_xx.jpg files.

@@ -1,0 +1,8 @@
+*.pyc
+jpeg2dct.egg-info
+dist
+build
+.idea
+.cache/
+.eggs/
+.pytest_cache/
