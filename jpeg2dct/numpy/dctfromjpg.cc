@@ -1,7 +1,7 @@
 #include <cstdlib>
-#include <stdio.h>
-#include <stdexcept>
 #include <cstring>
+#include <stdexcept>
+#include <stdio.h>
 
 // Has to come after `stdio.h`
 #include <jpeglib.h>
@@ -37,7 +37,7 @@ void read_dct_coefficients(jpeg_decompress_struct *srcinfo,
     long nb_elements =
         (long)(band->dct_h) * (long)(band->dct_w) * (long)(band->dct_b);
     band->dct = new short[nb_elements];
-    std::memset((void*) band->dct, 0, sizeof(short) * nb_elements);
+    std::memset((void *)band->dct, 0, sizeof(short) * nb_elements);
     return;
   }
 
@@ -70,7 +70,7 @@ void read_dct_coefficients(jpeg_decompress_struct *srcinfo,
 }
 
 void add_error_handler(jpeg_error_mgr *jerr) {
-  jerr->error_exit = [](j_common_ptr cinfo){
+  jerr->error_exit = [](j_common_ptr cinfo) {
     char pszErr[1024];
     (cinfo->err->format_message)(cinfo, pszErr);
     throw std::runtime_error(pszErr);
@@ -198,9 +198,9 @@ void read_dct_coefficients_from_buffer(
   unpack_band_info(band3, band3_dct, band3_dct_h, band3_dct_w, band3_dct_b);
 }
 
-void read_dct_coefficients_from_file_(const char *filename, bool normalized,
-                                     int channels, band_info *band1,
-                                     band_info *band2, band_info *band3) {
+void read_dct_coefficients_from_file_(char *filename, bool normalized,
+                                      int channels, band_info *band1,
+                                      band_info *band2, band_info *band3) {
   FILE *infile;
   if ((infile = fopen(filename, "rb")) == nullptr) {
     fprintf(stderr, "ERROR: can't open %s\n", filename);
@@ -222,7 +222,7 @@ void read_dct_coefficients_from_file_(const char *filename, bool normalized,
 }
 
 void read_dct_coefficients_from_file(
-    const char *filename, bool normalized, int channels, short **band1_dct,
+    char *filename, bool normalized, int channels, short **band1_dct,
     int *band1_dct_h, int *band1_dct_w, int *band1_dct_b, short **band2_dct,
     int *band2_dct_h, int *band2_dct_w, int *band2_dct_b, short **band3_dct,
     int *band3_dct_h, int *band3_dct_w, int *band3_dct_b) {

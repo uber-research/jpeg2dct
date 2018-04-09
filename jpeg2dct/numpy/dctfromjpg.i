@@ -11,6 +11,10 @@
 import_array();
 %}
 
+%begin %{
+#define SWIG_PYTHON_STRICT_BYTE_CHAR
+%}
+
 %apply (short **ARGOUTVIEWM_ARRAY3, int *DIM1, int *DIM2, int *DIM3) {(short **band1_dct, int *band1_dct_h, int *band1_dct_w, int *band1_dct_b)};
 %apply (short **ARGOUTVIEWM_ARRAY3, int *DIM1, int *DIM2, int *DIM3) {(short **band2_dct, int *band2_dct_h, int *band2_dct_w, int *band2_dct_b)};
 %apply (short **ARGOUTVIEWM_ARRAY3, int *DIM1, int *DIM2, int *DIM3) {(short **band3_dct, int *band3_dct_h, int *band3_dct_w, int *band3_dct_b)};

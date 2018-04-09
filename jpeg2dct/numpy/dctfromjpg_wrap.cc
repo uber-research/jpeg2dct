@@ -9,6 +9,9 @@
  * interface file instead.
  * ----------------------------------------------------------------------------- */
 
+#define SWIG_PYTHON_STRICT_BYTE_CHAR
+
+
 
 #ifndef SWIGPYTHON
 #define SWIGPYTHON
@@ -3232,16 +3235,21 @@ SWIG_CanCastAsInteger(double *d, double min, double max) {
 
 
 SWIGINTERN int
-SWIG_AsVal_long (PyObject *obj, long* val)
+SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
 {
 #if PY_VERSION_HEX < 0x03000000
   if (PyInt_Check(obj)) {
-    if (val) *val = PyInt_AsLong(obj);
-    return SWIG_OK;
+    long v = PyInt_AsLong(obj);
+    if (v >= 0) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      return SWIG_OverflowError;
+    }
   } else
 #endif
   if (PyLong_Check(obj)) {
-    long v = PyLong_AsLong(obj);
+    unsigned long v = PyLong_AsUnsignedLong(obj);
     if (!PyErr_Occurred()) {
       if (val) *val = v;
       return SWIG_OK;
@@ -3253,7 +3261,7 @@ SWIG_AsVal_long (PyObject *obj, long* val)
 #ifdef SWIG_PYTHON_CAST_MODE
   {
     int dispatch = 0;
-    long v = PyInt_AsLong(obj);
+    unsigned long v = PyLong_AsUnsignedLong(obj);
     if (!PyErr_Occurred()) {
       if (val) *val = v;
       return SWIG_AddCast(SWIG_OK);
@@ -3263,8 +3271,8 @@ SWIG_AsVal_long (PyObject *obj, long* val)
     if (!dispatch) {
       double d;
       int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
-	if (val) *val = (long)(d);
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
+	if (val) *val = (unsigned long)(d);
 	return res;
       }
     }
@@ -3275,15 +3283,15 @@ SWIG_AsVal_long (PyObject *obj, long* val)
 
 
 SWIGINTERN int
-SWIG_AsVal_int (PyObject * obj, int *val)
+SWIG_AsVal_unsigned_SS_int (PyObject * obj, unsigned int *val)
 {
-  long v;
-  int res = SWIG_AsVal_long (obj, &v);
+  unsigned long v;
+  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
   if (SWIG_IsOK(res)) {
-    if ((v < INT_MIN || v > INT_MAX)) {
+    if ((v > UINT_MAX)) {
       return SWIG_OverflowError;
     } else {
-      if (val) *val = static_cast< int >(v);
+      if (val) *val = static_cast< unsigned int >(v);
     }
   }  
   return res;
@@ -3291,9 +3299,9 @@ SWIG_AsVal_int (PyObject * obj, int *val)
 
 
 SWIGINTERNINLINE PyObject*
-  SWIG_From_int  (int value)
+  SWIG_From_unsigned_SS_int  (unsigned int value)
 {
-  return PyInt_FromLong((long) value);
+  return PyInt_FromSize_t((size_t) value);
 }
 
 
@@ -3427,6 +3435,49 @@ SWIG_AsCharPtrAndSize(PyObject *obj, char** cptr, size_t* psize, int *alloc)
 
 
 SWIGINTERN int
+SWIG_AsVal_long (PyObject *obj, long* val)
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyInt_Check(obj)) {
+    if (val) *val = PyInt_AsLong(obj);
+    return SWIG_OK;
+  } else
+#endif
+  if (PyLong_Check(obj)) {
+    long v = PyLong_AsLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+      return SWIG_OverflowError;
+    }
+  }
+#ifdef SWIG_PYTHON_CAST_MODE
+  {
+    int dispatch = 0;
+    long v = PyInt_AsLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_AddCast(SWIG_OK);
+    } else {
+      PyErr_Clear();
+    }
+    if (!dispatch) {
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, LONG_MIN, LONG_MAX)) {
+	if (val) *val = (long)(d);
+	return res;
+      }
+    }
+  }
+#endif
+  return SWIG_TypeError;
+}
+
+
+SWIGINTERN int
 SWIG_AsVal_bool (PyObject *obj, bool *val)
 {
   int r;
@@ -3437,6 +3488,22 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
     return SWIG_ERROR;
   if (val) *val = r ? true : false;
   return SWIG_OK;
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_int (PyObject * obj, int *val)
+{
+  long v;
+  int res = SWIG_AsVal_long (obj, &v);
+  if (SWIG_IsOK(res)) {
+    if ((v < INT_MIN || v > INT_MAX)) {
+      return SWIG_OverflowError;
+    } else {
+      if (val) *val = static_cast< int >(v);
+    }
+  }  
+  return res;
 }
 
 
@@ -3520,54 +3587,6 @@ SWIG_AsVal_bool (PyObject *obj, bool *val)
 
 
 
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
-{
-#if PY_VERSION_HEX < 0x03000000
-  if (PyInt_Check(obj)) {
-    long v = PyInt_AsLong(obj);
-    if (v >= 0) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      return SWIG_OverflowError;
-    }
-  } else
-#endif
-  if (PyLong_Check(obj)) {
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      PyErr_Clear();
-      return SWIG_OverflowError;
-    }
-  }
-#ifdef SWIG_PYTHON_CAST_MODE
-  {
-    int dispatch = 0;
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_AddCast(SWIG_OK);
-    } else {
-      PyErr_Clear();
-    }
-    if (!dispatch) {
-      double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
-	if (val) *val = (unsigned long)(d);
-	return res;
-      }
-    }
-  }
-#endif
-  return SWIG_TypeError;
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -3626,10 +3645,10 @@ fail:
 SWIGINTERN PyObject *_wrap_band_info_dct_h_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   jpeg2dct::common::band_info *arg1 = (jpeg2dct::common::band_info *) 0 ;
-  int arg2 ;
+  unsigned int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
+  unsigned int val2 ;
   int ecode2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
@@ -3640,11 +3659,11 @@ SWIGINTERN PyObject *_wrap_band_info_dct_h_set(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "band_info_dct_h_set" "', argument " "1"" of type '" "jpeg2dct::common::band_info *""'"); 
   }
   arg1 = reinterpret_cast< jpeg2dct::common::band_info * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "band_info_dct_h_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "band_info_dct_h_set" "', argument " "2"" of type '" "unsigned int""'");
   } 
-  arg2 = static_cast< int >(val2);
+  arg2 = static_cast< unsigned int >(val2);
   if (arg1) (arg1)->dct_h = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -3659,7 +3678,7 @@ SWIGINTERN PyObject *_wrap_band_info_dct_h_get(PyObject *SWIGUNUSEDPARM(self), P
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  int result;
+  unsigned int result;
   
   if(!PyArg_UnpackTuple(args,(char *)"band_info_dct_h_get",1,1,&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_jpeg2dct__common__band_info, 0 |  0 );
@@ -3667,8 +3686,8 @@ SWIGINTERN PyObject *_wrap_band_info_dct_h_get(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "band_info_dct_h_get" "', argument " "1"" of type '" "jpeg2dct::common::band_info *""'"); 
   }
   arg1 = reinterpret_cast< jpeg2dct::common::band_info * >(argp1);
-  result = (int) ((arg1)->dct_h);
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  result = (unsigned int) ((arg1)->dct_h);
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
   return NULL;
@@ -3678,10 +3697,10 @@ fail:
 SWIGINTERN PyObject *_wrap_band_info_dct_w_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   jpeg2dct::common::band_info *arg1 = (jpeg2dct::common::band_info *) 0 ;
-  int arg2 ;
+  unsigned int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
+  unsigned int val2 ;
   int ecode2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
@@ -3692,11 +3711,11 @@ SWIGINTERN PyObject *_wrap_band_info_dct_w_set(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "band_info_dct_w_set" "', argument " "1"" of type '" "jpeg2dct::common::band_info *""'"); 
   }
   arg1 = reinterpret_cast< jpeg2dct::common::band_info * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "band_info_dct_w_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "band_info_dct_w_set" "', argument " "2"" of type '" "unsigned int""'");
   } 
-  arg2 = static_cast< int >(val2);
+  arg2 = static_cast< unsigned int >(val2);
   if (arg1) (arg1)->dct_w = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -3711,7 +3730,7 @@ SWIGINTERN PyObject *_wrap_band_info_dct_w_get(PyObject *SWIGUNUSEDPARM(self), P
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  int result;
+  unsigned int result;
   
   if(!PyArg_UnpackTuple(args,(char *)"band_info_dct_w_get",1,1,&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_jpeg2dct__common__band_info, 0 |  0 );
@@ -3719,8 +3738,8 @@ SWIGINTERN PyObject *_wrap_band_info_dct_w_get(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "band_info_dct_w_get" "', argument " "1"" of type '" "jpeg2dct::common::band_info *""'"); 
   }
   arg1 = reinterpret_cast< jpeg2dct::common::band_info * >(argp1);
-  result = (int) ((arg1)->dct_w);
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  result = (unsigned int) ((arg1)->dct_w);
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
   return NULL;
@@ -3730,10 +3749,10 @@ fail:
 SWIGINTERN PyObject *_wrap_band_info_dct_b_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   jpeg2dct::common::band_info *arg1 = (jpeg2dct::common::band_info *) 0 ;
-  int arg2 ;
+  unsigned int arg2 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
+  unsigned int val2 ;
   int ecode2 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
@@ -3744,11 +3763,11 @@ SWIGINTERN PyObject *_wrap_band_info_dct_b_set(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "band_info_dct_b_set" "', argument " "1"" of type '" "jpeg2dct::common::band_info *""'"); 
   }
   arg1 = reinterpret_cast< jpeg2dct::common::band_info * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "band_info_dct_b_set" "', argument " "2"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "band_info_dct_b_set" "', argument " "2"" of type '" "unsigned int""'");
   } 
-  arg2 = static_cast< int >(val2);
+  arg2 = static_cast< unsigned int >(val2);
   if (arg1) (arg1)->dct_b = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -3763,7 +3782,7 @@ SWIGINTERN PyObject *_wrap_band_info_dct_b_get(PyObject *SWIGUNUSEDPARM(self), P
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  int result;
+  unsigned int result;
   
   if(!PyArg_UnpackTuple(args,(char *)"band_info_dct_b_get",1,1,&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_jpeg2dct__common__band_info, 0 |  0 );
@@ -3771,8 +3790,8 @@ SWIGINTERN PyObject *_wrap_band_info_dct_b_get(PyObject *SWIGUNUSEDPARM(self), P
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "band_info_dct_b_get" "', argument " "1"" of type '" "jpeg2dct::common::band_info *""'"); 
   }
   arg1 = reinterpret_cast< jpeg2dct::common::band_info * >(argp1);
-  result = (int) ((arg1)->dct_b);
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  result = (unsigned int) ((arg1)->dct_b);
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
   return NULL;
@@ -3867,7 +3886,7 @@ SWIGINTERN PyObject *_wrap_read_dct_coefficients_from_file_(PyObject *SWIGUNUSED
   if(!PyArg_UnpackTuple(args,(char *)"read_dct_coefficients_from_file_",6,6,&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "read_dct_coefficients_from_file_" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "read_dct_coefficients_from_file_" "', argument " "1"" of type '" "char *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   ecode2 = SWIG_AsVal_bool(obj1, &val2);
@@ -3897,7 +3916,7 @@ SWIGINTERN PyObject *_wrap_read_dct_coefficients_from_file_(PyObject *SWIGUNUSED
   arg6 = reinterpret_cast< jpeg2dct::common::band_info * >(argp6);
   {
     try {
-      jpeg2dct::common::read_dct_coefficients_from_file_((char const *)arg1,arg2,arg3,arg4,arg5,arg6);
+      jpeg2dct::common::read_dct_coefficients_from_file_(arg1,arg2,arg3,arg4,arg5,arg6);
     } catch (std::runtime_error &e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     } catch (...) {
@@ -3974,7 +3993,7 @@ SWIGINTERN PyObject *_wrap_read_dct_coefficients_from_file(PyObject *SWIGUNUSEDP
   if(!PyArg_UnpackTuple(args,(char *)"read_dct_coefficients_from_file",3,3,&obj0,&obj1,&obj2)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "read_dct_coefficients_from_file" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "read_dct_coefficients_from_file" "', argument " "1"" of type '" "char *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   ecode2 = SWIG_AsVal_bool(obj1, &val2);
@@ -3989,7 +4008,7 @@ SWIGINTERN PyObject *_wrap_read_dct_coefficients_from_file(PyObject *SWIGUNUSEDP
   arg3 = static_cast< int >(val3);
   {
     try {
-      jpeg2dct::common::read_dct_coefficients_from_file((char const *)arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
+      jpeg2dct::common::read_dct_coefficients_from_file(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
     } catch (std::runtime_error &e) {
       SWIG_exception(SWIG_RuntimeError, e.what());
     } catch (...) {

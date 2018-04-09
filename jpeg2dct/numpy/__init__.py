@@ -1,4 +1,3 @@
-import numpy as np
 import os
 
 from . import dctfromjpg_wrapper
@@ -17,7 +16,8 @@ def load(filename, normalized=True, channels=3):
         raise IOError('{} does not exists'.format(filename))
     if channels not in {3, 1}:
         raise ValueError('channels should be 3 or 1')
-    [band1, band2, band3] = dctfromjpg_wrapper.read_dct_coefficients_from_file(filename, normalized, channels)
+    [band1, band2, band3] = dctfromjpg_wrapper.read_dct_coefficients_from_file(
+        filename.encode(), normalized, channels)
     return [band1, band2, band3] if channels == 3 else [band1]
 
 
@@ -33,5 +33,9 @@ def loads(buffer, normalized=True, channels=3):
     if channels not in {3, 1}:
         raise ValueError('channels should be 3 or 1')
     l_buffer = int(len(buffer))
-    [band1, band2, band3] = dctfromjpg_wrapper.read_dct_coefficients_from_buffer(buffer, l_buffer, normalized, channels)
+    if type(buffer) == str:
+        # supports both strings and byte arrays
+        buffer = buffer.encode()
+    [band1, band2, band3] = dctfromjpg_wrapper.read_dct_coefficients_from_buffer(
+        buffer, l_buffer, normalized, channels)
     return [band1, band2, band3] if channels == 3 else [band1]
