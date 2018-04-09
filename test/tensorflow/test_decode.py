@@ -1,8 +1,9 @@
 import os
 from unittest import TestCase
 
-from jpeg2dct.tensorflow import decode
 import tensorflow as tf
+from jpeg2dct.tensorflow import decode
+
 
 class TestLoad(TestCase):
     def setUp(self):
@@ -22,8 +23,7 @@ class TestLoad(TestCase):
 
     @staticmethod
     def bytess_helper(jpeg_fname):
-        with open(jpeg_fname) as src:
-            jpegbytes = src.read()
+        jpegbytes = tf.read_file(jpeg_fname)
         return jpegbytes
 
     def test_decode(self):

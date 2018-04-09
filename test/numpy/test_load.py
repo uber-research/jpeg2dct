@@ -35,7 +35,7 @@ class TestLoad(TestCase):
 
     def test_loads(self):
         with open(self.jpeg_file, 'r') as src:
-            buffer = src.read()
+            buffer = str(src.read())
         dct_y, dct_c, dct_r = loads(buffer)
         self.assertEqual(dct_y.shape, (205, 205, 64), "wrong dct shape")
         self.assertEqual(dct_c.shape, (103, 103, 64), "wrong dct shape")
