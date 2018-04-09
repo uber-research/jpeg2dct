@@ -46,10 +46,15 @@ class TestLoad(TestCase):
         self.assertEqual(dct_c_nonormalized.shape, (103, 103, 64), "wrong dct shape")
         self.assertEqual(dct_r_nonormalized.shape, (103, 103, 64), "wrong dct shape")
 
-        for c in range(dct_y.shape[-1]):
-            normalized_range = dct_y.min(), dct_y.max()
-            unnormalized_range = dct_y_nonormalized.min(), dct_y_nonormalized.max()
-            self.assertTrue(unnormalized_range[0] >= normalized_range[0] and
+        normalized_range = dct_y.min(), dct_y.max()
+        unnormalized_range = dct_y_nonormalized.min(), dct_y_nonormalized.max()
+        self.assertTrue(unnormalized_range[0] >= normalized_range[0] and
+                            unnormalized_range[1] <= normalized_range[1],
+                            "normalized shall produce large range of values")
+
+        normalized_range = dct_c.min(), dct_c.max()
+        unnormalized_range = dct_c_nonormalized.min(), dct_c_nonormalized.max()
+        self.assertTrue(unnormalized_range[0] >= normalized_range[0] and
                             unnormalized_range[1] <= normalized_range[1],
                             "normalized shall produce large range of values")
 
