@@ -33,9 +33,6 @@ def loads(buffer, normalized=True, channels=3):
     if channels not in {3, 1}:
         raise ValueError('channels should be 3 or 1')
     l_buffer = int(len(buffer))
-    if type(buffer) == str:
-        # supports both strings and byte arrays
-        buffer = buffer.encode()
     [band1, band2, band3] = dctfromjpg_wrapper.read_dct_coefficients_from_buffer(
         buffer, l_buffer, normalized, channels)
     return [band1, band2, band3] if channels == 3 else [band1]
