@@ -6,9 +6,9 @@ namespace common {
 
 struct band_info {
   short *dct;
-  int dct_h;
-  int dct_w;
-  int dct_b;
+  unsigned int dct_h;
+  unsigned int dct_w;
+  unsigned int dct_b;
 };
 
 void read_dct_coefficients_from_file_(const char *filename, bool normalized,
