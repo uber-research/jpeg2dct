@@ -34,8 +34,8 @@ class TestLoad(TestCase):
                             "normalized shall produce large range of values")
 
     def test_loads(self):
-        with open(self.jpeg_file, 'r') as src:
-            buffer = str(src.read())
+        with open(self.jpeg_file, 'rb') as src:
+            buffer = src.read()
         dct_y, dct_c, dct_r = loads(buffer)
         self.assertEqual(dct_y.shape, (205, 205, 64), "wrong dct shape")
         self.assertEqual(dct_c.shape, (103, 103, 64), "wrong dct shape")
