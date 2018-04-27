@@ -265,7 +265,7 @@ setup(name='jpeg2dct',
       url='https://github.com/uber/jpeg2dct',
       ext_modules=[numpy_lib, tf_lib],
       cmdclass={'build_ext': custom_build_ext},
-      setup_requires=['numpy', 'pytest-runner'],
+      setup_requires=['numpy', 'pytest-runner', 'protobuf>=3.5.1'],
       install_requires=['numpy'],
       tests_require=['pytest'],
       zip_safe=False)
