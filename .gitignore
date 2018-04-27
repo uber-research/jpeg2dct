@@ -6,3 +6,5 @@ build
 .cache/
 .eggs/
 .pytest_cache/
+jpeg2dct/numpy/_dctfromjpg_wrapper.so
+jpeg2dct/tensorflow/tf_lib.so

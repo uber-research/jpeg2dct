@@ -50,8 +50,14 @@ TODO
 ```commandline
 git clone https://github.com/uber-research/jpeg2dct.git
 cd jpeg2dct
-# export MACOSX_DEPLOYMENT_TARGET=10.10
 python setup.py install
+```
+
+On Mac run the following, before python setup.py ...
+```commandline
+export MACOSX_DEPLOYMENT_TARGET=10.10
+#or
+conda install --channel https://conda.anaconda.org/anaconda clangxx_osx-64
 ```
 
 test the installation

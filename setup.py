@@ -176,11 +176,16 @@ def test_compile(build_ext, name, code, libraries=None, include_dirs=None, libra
     return shared_object_file
 
 
+def get_conda_include_dir():
+    prefix = os.environ.get('CONDA_PREFIX', '.')
+    return [os.path.join(prefix,'include')]
+
+
 def get_common_options(build_ext):
     cpp_flags = get_cpp_flags(build_ext)
 
     MACROS = []
-    INCLUDES = []
+    INCLUDES = [] + get_conda_include_dir()
     SOURCES = []
     COMPILE_FLAGS = cpp_flags
     LINK_FLAGS = []
