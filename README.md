@@ -63,6 +63,9 @@ conda install --channel https://conda.anaconda.org/anaconda clangxx_osx-64
 test the installation
 ```commandline
 python setup.py test
+# or
+python setup.py develop
+pytest
 ```
 
 
