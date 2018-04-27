@@ -36,6 +36,7 @@ with tf.Session() as sess:
 
 ```
 
+
 ## Installation
 #### Requirements
 1. Numpy>=1.14.0
@@ -57,6 +58,8 @@ test the installation
 ```commandline
 python setup.py test
 ```
+
+
 
 ## Publications
 1. Lionel Gueguen, Alex Sergeev, Rosanne Liu, Jason Yosinski (2018) *Faster Neural Networks Straight from JPEG*, [url](https://openreview.net/forum?id=S1ry6Y1vG)
