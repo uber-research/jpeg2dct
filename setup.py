@@ -262,10 +262,10 @@ setup(name='jpeg2dct',
       long_description=textwrap.dedent('''\
           jpeg2dct library provides native Python function and a TensorFlow Op to read JPEG image
           as a numpy array or a Tensor containing DCT coefficients.'''),
-      url='https://github.com/uber/jpeg2dct',
+      url='https://github.com/uber-research/jpeg2dct',
       ext_modules=[numpy_lib, tf_lib],
       cmdclass={'build_ext': custom_build_ext},
-      setup_requires=['numpy', 'pytest-runner', 'protobuf>=3.5.1'],
+      setup_requires=['numpy'],
       install_requires=['numpy'],
       tests_require=['pytest'],
       zip_safe=False)
