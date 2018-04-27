@@ -50,8 +50,10 @@ TODO
 ```commandline
 git clone https://github.com/uber-research/jpeg2dct.git
 cd jpeg2dct
+# export MACOSX_DEPLOYMENT_TARGET=10.10
 python setup.py install
 ```
+
 test the installation
 ```commandline
 python setup.py test
