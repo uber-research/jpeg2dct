@@ -50,7 +50,7 @@ pip install jpeg2dct
 
 #### From source
 ```commandline
-git clone https://github.com/uber-research/jpeg2dct
+git clone https://github.com/uber-research/jpeg2dct.git
 cd jpeg2dct
 python setup.py install
 ```
