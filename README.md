@@ -43,10 +43,8 @@ with tf.Session() as sess:
 2. libjpeg or libjpeg-turbo
 2. (Optional) Tensorflow>=1.5.0
 
-#### Pip
-```commandline
-pip install jpeg2dct
-```
+#### ~~Pip~~
+TODO
 
 #### From source
 ```commandline
