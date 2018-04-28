@@ -10,6 +10,7 @@ import traceback
 
 from jpeg2dct import __version__
 
+common_lib = Extension('jpeg2dct.common.common_lib', [])
 numpy_lib = Extension('jpeg2dct.numpy._dctfromjpg_wrapper', [])
 tf_lib = Extension('jpeg2dct.tensorflow.tf_lib', [])
 
@@ -201,17 +202,29 @@ def get_common_options(build_ext):
                 LIBRARIES=LIBRARIES)
 
 
+def build_common_extension(build_ext, options, abi_compile_flags):
+    common_lib.define_macros = options['MACROS']
+    common_lib.include_dirs = options['INCLUDES']
+    common_lib.sources = options['SOURCES'] + ['jpeg2dct/common/dctfromjpg.cc']
+    common_lib.extra_compile_args = options['COMPILE_FLAGS'] + \
+                                   abi_compile_flags
+    common_lib.extra_link_args = options['LINK_FLAGS']
+    common_lib.library_dirs = options['LIBRARY_DIRS']
+    common_lib.libraries = options['LIBRARIES'] + ['jpeg']
+
+    build_ext.build_extension(common_lib)
+
+
 def build_numpy_extension(build_ext, options, abi_compile_flags):
     import numpy
     numpy_lib.define_macros = options['MACROS']
     numpy_lib.include_dirs = options['INCLUDES'] + [numpy.get_include()]
-    numpy_lib.sources = options['SOURCES'] + ['jpeg2dct/numpy/dctfromjpg.cc',
-                                              'jpeg2dct/numpy/dctfromjpg_wrap.cc']
+    numpy_lib.sources = options['SOURCES'] + ['jpeg2dct/numpy/dctfromjpg_wrap.cc']
     numpy_lib.extra_compile_args = options['COMPILE_FLAGS'] + \
                                    abi_compile_flags
     numpy_lib.extra_link_args = options['LINK_FLAGS']
     numpy_lib.library_dirs = options['LIBRARY_DIRS']
-    numpy_lib.libraries = options['LIBRARIES'] + ['jpeg']
+    numpy_lib.libraries = options['LIBRARIES']
 
     build_ext.build_extension(numpy_lib)
 
@@ -254,6 +267,7 @@ class custom_build_ext(build_ext):
                     built_plugins.append(False)
                 else:
                     raise
+        build_common_extension(self, options, abi_compile_flags)
         build_numpy_extension(self, options, abi_compile_flags)
 
 
@@ -268,7 +282,7 @@ setup(name='jpeg2dct',
           jpeg2dct library provides native Python function and a TensorFlow Op to read JPEG image
           as a numpy array or a Tensor containing DCT coefficients.'''),
       url='https://github.com/uber-research/jpeg2dct',
-      ext_modules=[numpy_lib, tf_lib],
+      ext_modules=[common_lib, numpy_lib, tf_lib],
       cmdclass={'build_ext': custom_build_ext},
       setup_requires=['numpy'],
       install_requires=['numpy'],

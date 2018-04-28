@@ -2,7 +2,7 @@
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/shape_inference.h"
 
-#include "../numpy/dctfromjpg.h"
+#include "../common/dctfromjpg.h"
 
 using namespace tensorflow;
 

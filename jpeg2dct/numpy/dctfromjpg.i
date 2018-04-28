@@ -3,7 +3,7 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include "dctfromjpg.h"
+#include "../common/dctfromjpg.h"
 %}
 
 %include "numpy.i"
@@ -30,5 +30,5 @@ import_array();
   }
 }
 
-%include "dctfromjpg.h"
+%include "../common/dctfromjpg.h"
 using namespace jpeg2dct::common;

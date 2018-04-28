@@ -7,8 +7,8 @@ from tensorflow.python.framework import ops
 from tensorflow.python.platform import resource_loader
 import sysconfig
 
-# make sure dctfromjpg library is loaded
-from jpeg2dct.numpy import dctfromjpg_wrapper
+# make sure common library is loaded
+import jpeg2dct.common
 
 
 def get_ext_suffix():
