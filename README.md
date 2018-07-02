@@ -43,8 +43,17 @@ with tf.Session() as sess:
 2. libjpeg or libjpeg-turbo
 2. (Optional) Tensorflow>=1.5.0
 
-#### ~~Pip~~
-TODO
+#### Pip
+```commandline
+pip install jpeg2dct
+```
+
+On macOS 10.13, with default Python, the compiler has troubles. In Conda, the following is unnecessary.
+```commandline
+mv /usr/local/include /usr/local/include_old
+brew reinstall llvm libjpeg
+pip install jpeg2dct
+```
 
 #### From source
 ```commandline
