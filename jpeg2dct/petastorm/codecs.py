@@ -13,6 +13,9 @@ class Jpeg2DCTNumpyCodec(object):
         """Jpeg2DCTCodec would compress images into jpeg, but decompress into DCT coefficients
         :param quality: used when using jpeg lossy compression
         :param is_rgb: boolean indicating if image comes as rgb
+        :param normalized: boolean. If True, dct coefficients are normalized with quantification tables.
+            If False, no normalization is performed.
+        :param channels: number of color channels for the decoded image
         """
         self._image_codec = '.jpeg'
         self._quality = quality
