@@ -8,7 +8,7 @@ except:
     raise Exception("cv2 and pyspark package needs to be installed, for parquest related representations")
 
 
-class Jpeg2DCTCodec(object):
+class Jpeg2DCTNumpyCodec(object):
     def __init__(self, quality=80, is_rgb=False, normalized=True, channels=3):
         """Jpeg2DCTCodec would compress images into jpeg, but decompress into DCT coefficients
         :param quality: used when using jpeg lossy compression
