@@ -9,6 +9,7 @@
 
 import os
 
+import jpeg2dct.common
 from . import dctfromjpg_wrapper
 
 

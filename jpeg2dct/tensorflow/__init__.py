@@ -16,9 +16,10 @@ import sysconfig
 from tensorflow.python.framework import load_library
 from tensorflow.python.framework import ops
 from tensorflow.python.platform import resource_loader
-
+import sysconfig
 
 # make sure common library is loaded
+import jpeg2dct.common
 
 
 def get_ext_suffix():
