@@ -7,8 +7,8 @@
 # the SWIG interface file instead.
 
 
-
 from sys import version_info as _swig_python_version_info
+
 if _swig_python_version_info >= (2, 7, 0):
     def swig_import_helper():
         import importlib
@@ -18,6 +18,8 @@ if _swig_python_version_info >= (2, 7, 0):
             return importlib.import_module(mname)
         except ImportError:
             return importlib.import_module('_dctfromjpg_wrapper')
+
+
     _dctfromjpg_wrapper = swig_import_helper()
     del swig_import_helper
 elif _swig_python_version_info >= (2, 6, 0):
@@ -36,6 +38,8 @@ elif _swig_python_version_info >= (2, 6, 0):
             finally:
                 fp.close()
             return _mod
+
+
     _dctfromjpg_wrapper = swig_import_helper()
     del swig_import_helper
 else:
@@ -50,6 +54,7 @@ try:
     import builtins as __builtin__
 except ImportError:
     import __builtin__
+
 
 def _swig_setattr_nondynamic(self, class_type, name, value, static=1):
     if (name == "thisown"):
@@ -96,6 +101,7 @@ def _swig_setattr_nondynamic_method(set):
             set(self, name, value)
         else:
             raise AttributeError("You cannot add attributes to %s" % self)
+
     return set_attr
 
 
@@ -113,26 +119,39 @@ class band_info(object):
             self.this.append(this)
         except __builtin__.Exception:
             self.this = this
+
     __swig_destroy__ = _dctfromjpg_wrapper.delete_band_info
     __del__ = lambda self: None
+
+
 band_info_swigregister = _dctfromjpg_wrapper.band_info_swigregister
 band_info_swigregister(band_info)
 
 
 def read_dct_coefficients_from_file_(filename, normalized, channels, band1, band2, band3):
     return _dctfromjpg_wrapper.read_dct_coefficients_from_file_(filename, normalized, channels, band1, band2, band3)
+
+
 read_dct_coefficients_from_file_ = _dctfromjpg_wrapper.read_dct_coefficients_from_file_
+
 
 def read_dct_coefficients_from_file(filename, normalized, channels):
     return _dctfromjpg_wrapper.read_dct_coefficients_from_file(filename, normalized, channels)
+
+
 read_dct_coefficients_from_file = _dctfromjpg_wrapper.read_dct_coefficients_from_file
 
+
 def read_dct_coefficients_from_buffer_(buffer, buffer_len, normalized, channels, band1, band2, band3):
-    return _dctfromjpg_wrapper.read_dct_coefficients_from_buffer_(buffer, buffer_len, normalized, channels, band1, band2, band3)
+    return _dctfromjpg_wrapper.read_dct_coefficients_from_buffer_(buffer, buffer_len, normalized, channels, band1,
+                                                                  band2, band3)
+
+
 read_dct_coefficients_from_buffer_ = _dctfromjpg_wrapper.read_dct_coefficients_from_buffer_
+
 
 def read_dct_coefficients_from_buffer(buffer, buffer_len, normalized, channels):
     return _dctfromjpg_wrapper.read_dct_coefficients_from_buffer(buffer, buffer_len, normalized, channels)
+
+
 read_dct_coefficients_from_buffer = _dctfromjpg_wrapper.read_dct_coefficients_from_buffer
-
-
