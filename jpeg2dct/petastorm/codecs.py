@@ -51,9 +51,8 @@ class Jpeg2DCTNumpyCodec(object):
 
     def decode(self, unischema_field, value):
         """read/load the dct coefficients from a string of bytes representing a jpeg image
-        :param buffer: the jpg file buffer
-        :param normalized: boolean. If True, dct coefficients are normalized with quantification tables. If False, no normalization is performed.
-        :param channels: number of color channels for the decoded image
+        :param unischema_field: not used, interface compatibility
+        :param value: jpeg bytes
         """
         dct_y, dct_cb, dct_cr = loads(value, self._normalized, self._channels)
         return dct_y, dct_cb, dct_cr
