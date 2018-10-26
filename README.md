@@ -84,7 +84,7 @@ export MACOSX_DEPLOYMENT_TARGET=10.10
 conda install --channel https://conda.anaconda.org/anaconda clangxx_osx-64
 ```
 
-Test the installation
+#### Test the installation
 
 ```commandline
 python setup.py test
