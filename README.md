@@ -1,6 +1,19 @@
-# jpeg2dct
+# Faster Neural Networks Straight from JPEG: jpeg2dct subroutines
 
-jpeg2dct library provides native Python functions and a TensorFlow Operators to read the Discrete Cosine Transform coefficients from image encoded in JPEG format.
+This repository contains source code useful for reproducing results presented in the paper [Faster Neural Networks Straight from JPEG](https://openreview.net/forum?id=S1ry6Y1vG) (ICLR workshop 2018):
+
+```
+@inproceedings{gueguen_2018_ICLR
+  title={Faster Neural Networks Straight from JPEG},
+  author={Lionel Gueguen and Alex Sergeev and Ben Kadlec and Rosanne Liu and Jason Yosinski},
+  booktitle={International Conference on Learning Representations},
+  year={2018}
+}
+```
+
+## jpeg2dct subroutines
+
+The jpeg2dct library provides native Python functions and a TensorFlow Operators to read the Discrete Cosine Transform coefficients from image encoded in JPEG format.
 The I/O operation leverages standard JPEG libraries ([libjpeg](http://libjpeg.sourceforge.net/) or [libjpeg-turbo](https://libjpeg-turbo.org/)) to perform the Huffman decoding and obtain the DCT coefficients.
 
 ## Usage
@@ -76,8 +89,3 @@ python setup.py test
 python setup.py develop
 pytest
 ```
-
-
-
-## Publications
-1. Lionel Gueguen, Alex Sergeev, Rosanne Liu, Jason Yosinski (2018) *Faster Neural Networks Straight from JPEG*, [url](https://openreview.net/forum?id=S1ry6Y1vG)
