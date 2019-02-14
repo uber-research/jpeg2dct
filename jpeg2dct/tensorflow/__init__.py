@@ -12,7 +12,6 @@ from __future__ import division
 from __future__ import print_function
 
 import sysconfig
-from functools import partial
 
 from tensorflow import map_fn, int16
 from tensorflow.python.framework import load_library
