@@ -48,6 +48,7 @@ public:
           context->allocate_output(i, TensorShape(band_shape), &band_tensor);
       std::memcpy((void *)band_tensor->tensor_data().data(),
                   (const void *)band.dct, band_tensor->tensor_data().size());
+      delete [] band.dct;
       if (!status.ok()) {
         context->CtxFailure(status);
         return;

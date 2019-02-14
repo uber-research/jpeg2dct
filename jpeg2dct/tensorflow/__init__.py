@@ -11,14 +11,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import sysconfig
+from functools import partial
+
+from tensorflow import map_fn, int16
 from tensorflow.python.framework import load_library
 from tensorflow.python.framework import ops
 from tensorflow.python.platform import resource_loader
-import sysconfig
+
 
 # make sure common library is loaded
 import jpeg2dct.common
-
 
 def get_ext_suffix():
     """Determine library extension for various versions of Python."""
@@ -80,3 +83,31 @@ def decode(buffer, normalized=True, channels=3, name=None):
 
 
 ops.NotDifferentiable('DecodeJpeg2dct')
+
+
+def batch_decode(buffers, normalized=True, channels=3, name=None):
+    """
+    Read/load the DCT coefficients from a batch of string bytes representing JPEG images.
+
+    Arguments
+        buffers: the batched tensor of JPEG buffers (batch_size,) of type tf.string
+        normalized: boolean. If True, dct coefficients are normalized with quantification tables.
+                    If False, no normalization is performed.
+        channels: number of color channels for the decoded image.
+
+    Output
+       output: (batch_size, dct_y, dct_c, dct_r) as Tensors of size h x w x nb dct coef.
+               given images of size 512 x 512 x 64 batched in b strings, the dct_y will be b x 64 x 64 x 64 and
+               dct_c, dct_r will be b x 32 x 32 x 64
+    """
+    def _decode(buffers):
+        dct_y, dct_cb, dct_cr = decode(buffers, normalized=normalized, channels=channels, name=name)
+        return dct_y, dct_cb, dct_cr
+
+    dct_y_batch, dct_c_batch, dct_r_batch = map_fn(
+        fn=_decode,
+        elems=buffers,
+        dtype=(int16, int16, int16)
+    )
+
+    return dct_y_batch, dct_c_batch, dct_r_batch

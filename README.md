@@ -37,6 +37,29 @@ dct_y, dct_cb, dct_cr = loads(buffer)
 
 ```
 #### Read into Tensorflow Op
+Example 1
+```python
+import tensorflow as tf
+from jpeg2dct.tensorflow import batch_decode
+
+# assemble the graph
+batch_size = 4
+images_byte_tensor = tf.placeholder(shape=(batch_size,), dtype=tf.string)
+dcty_batched, dctc_batched, dctr_batched = batch_decode(images_byte_tensor)
+
+# assemble the data to be fed to the graph
+jpeg_file = '/<jpeg2dct dir>/test/data/DCT_16_16.jpg'
+with open(jpeg_file) as src:
+    byt = src.read()
+images_byte_values = [byt for i in range(batch_size)]
+
+with tf.Session() as sess:
+    y, c, r = sess.run([dcty_batched, dctc_batched, dctr_batched],
+                        feed_dict={images_byte_tensor:images_byte_values})
+
+```
+
+Example 2
 ```python
 import tensorflow as tf
 from jpeg2dct.tensorflow import decode

@@ -11,7 +11,7 @@ import os
 from unittest import TestCase
 
 import tensorflow as tf
-from jpeg2dct.tensorflow import decode
+from jpeg2dct.tensorflow import decode, batch_decode
 
 
 class TestLoad(TestCase):
@@ -103,3 +103,21 @@ class TestLoad(TestCase):
             self.assertEqual(dct_y.eval().shape, (50, 75, 64), "wrong dct shape")
             self.assertEqual(dct_c.eval().shape, (25, 38, 64), "wrong dct shape")
             self.assertEqual(dct_r.eval().shape, (25, 38, 64), "wrong dct shape")
+
+    def test_batch(self):
+        batch_size = 6
+        image_bytes_tensor = tf.placeholder(shape=(batch_size,), dtype=tf.string)
+        dct_y_batch, dct_cb_batch, dct_cr_batch = batch_decode(image_bytes_tensor, name='g')
+
+        with open(self.jpeg_file) as src:
+            image_byte = src.read()
+        images_bytes = []
+        for i in range(batch_size):
+            images_bytes.append(image_byte)
+
+        with self.sess.as_default():
+            dcty, dctcb, dctcr = self.sess.run([dct_y_batch, dct_cb_batch, dct_cr_batch],
+                                               feed_dict={image_bytes_tensor: images_bytes})
+            self.assertEqual(dcty.shape, (batch_size, 205, 205, 64), "wrong dct shape")
+            self.assertEqual(dctcb.shape, (batch_size, 103, 103, 64), "wrong dct shape")
+            self.assertEqual(dctcr.shape, (batch_size, 103, 103, 64), "wrong dct shape")
