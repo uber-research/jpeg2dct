@@ -12,6 +12,7 @@ from __future__ import print_function
 import os
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
+from distutils import ccompiler, sysconfig
 from distutils.errors import CompileError, DistutilsPlatformError, LinkError
 import sys
 import textwrap
@@ -23,6 +24,9 @@ common_lib = Extension('jpeg2dct.common.common_lib', [])
 numpy_lib = Extension('jpeg2dct.numpy._dctfromjpg_wrapper', [])
 tf_lib = Extension('jpeg2dct.tensorflow.tf_lib', [])
 
+JPEG_ROOT = None
+
+DEBUG = False
 
 def check_tf_version():
     try:
@@ -190,20 +194,138 @@ def get_conda_include_dir():
     prefix = os.environ.get('CONDA_PREFIX', '.')
     return [os.path.join(prefix,'include')]
 
+def _dbg(s, tp=None):
+    if DEBUG:
+        if tp:
+            print(s % tp)
+            return
+        print(s)
+        
+def _cmd_exists(cmd):
+    return any(
+        os.access(os.path.join(path, cmd), os.X_OK)
+        for path in os.environ["PATH"].split(os.pathsep)
+    )
+
+def _pkg_config(name):
+    try:
+        command = os.environ.get("PKG_CONFIG", "pkg-config")
+        command_libs = [command, "--libs-only-L", name]
+        command_cflags = [command, "--cflags-only-I", name]
+        if not DEBUG:
+            command_libs.append("--silence-errors")
+            command_cflags.append("--silence-errors")
+        libs = (
+            subprocess.check_output(command_libs)
+            .decode("utf8")
+            .strip()
+            .replace("-L", "")
+        )
+        cflags = (
+            subprocess.check_output(command_cflags)
+            .decode("utf8")
+            .strip()
+            .replace("-I", "")
+        )
+        return (libs, cflags)
+    except Exception:
+        pass
+
+def _add_directory(path, subdir, where=None):
+    if subdir is None:
+        return
+    subdir = os.path.realpath(subdir)
+    if os.path.isdir(subdir) and subdir not in path:
+        if where is None:
+            _dbg("Appending path %s", subdir)
+            path.append(subdir)
+        else:
+            _dbg("Inserting path %s", subdir)
+            path.insert(where, subdir)
+    elif subdir in path and where is not None:
+        path.remove(subdir)
+        path.insert(where, subdir)
+
+def get_lib_and_include():
+    library_dirs = []
+    include_dirs = []
+
+    _add_directory(include_dirs, "src/libImaging")
+
+    pkg_config = None
+    if _cmd_exists(os.environ.get("PKG_CONFIG", "pkg-config")):
+        pkg_config = _pkg_config
+
+    #
+    # add configured kits
+    for root_name, lib_name in dict(
+        JPEG_ROOT="libjpeg"
+    ).items():
+        root = globals()[root_name]
+
+        if root is None and root_name in os.environ:
+            prefix = os.environ[root_name]
+            root = (os.path.join(prefix, "lib"), os.path.join(prefix, "include"))
+
+        if root is None and pkg_config:
+            if isinstance(lib_name, tuple):
+                for lib_name2 in lib_name:
+                    _dbg("Looking for `%s` using pkg-config." % lib_name2)
+                    root = pkg_config(lib_name2)
+                    if root:
+                        break
+            else:
+                _dbg("Looking for `%s` using pkg-config." % lib_name)
+                root = pkg_config(lib_name)
+
+        if isinstance(root, tuple):
+            lib_root, include_root = root
+        else:
+            lib_root = include_root = root
+
+        _add_directory(library_dirs, lib_root)
+        _add_directory(include_dirs, include_root)
+
+    # respect CFLAGS/CPPFLAGS/LDFLAGS
+    for k in ("CFLAGS", "CPPFLAGS", "LDFLAGS"):
+        if k in os.environ:
+            for match in re.finditer(r"-I([^\s]+)", os.environ[k]):
+                _add_directory(include_dirs, match.group(1))
+            for match in re.finditer(r"-L([^\s]+)", os.environ[k]):
+                _add_directory(library_dirs, match.group(1))
+
+    # include, rpath, if set as environment variables:
+    for k in ("C_INCLUDE_PATH", "CPATH", "INCLUDE"):
+        if k in os.environ:
+            for d in os.environ[k].split(os.path.pathsep):
+                _add_directory(include_dirs, d)
+
+    for k in ("LD_RUN_PATH", "LIBRARY_PATH", "LIB"):
+        if k in os.environ:
+            for d in os.environ[k].split(os.path.pathsep):
+                _add_directory(library_dirs, d)
+
+    prefix = sysconfig.get_config_var("prefix")
+    if prefix:
+        _add_directory(library_dirs, os.path.join(prefix, "lib"))
+        _add_directory(include_dirs, os.path.join(prefix, "include"))
+        
+    return library_dirs, include_dirs
 
 def get_common_options(build_ext):
     cpp_flags = get_cpp_flags(build_ext)
-
+    
+    LIBRARY_DIRS, INCLUDE_DIRS = get_lib_and_include()
+    
     MACROS = []
-    INCLUDES = [] + get_conda_include_dir()
+    INCLUDE_DIRS += get_conda_include_dir()
     SOURCES = []
     COMPILE_FLAGS = cpp_flags
     LINK_FLAGS = []
-    LIBRARY_DIRS = []
     LIBRARIES = []
 
     return dict(MACROS=MACROS,
-                INCLUDES=INCLUDES,
+                INCLUDE_DIRS=INCLUDE_DIRS,
                 SOURCES=SOURCES,
                 COMPILE_FLAGS=COMPILE_FLAGS,
                 LINK_FLAGS=LINK_FLAGS,
@@ -213,13 +335,13 @@ def get_common_options(build_ext):
 
 def build_common_extension(build_ext, options, abi_compile_flags):
     common_lib.define_macros = options['MACROS']
-    common_lib.include_dirs = options['INCLUDES']
+    common_lib.include_dirs = options['INCLUDE_DIRS']
     common_lib.sources = options['SOURCES'] + ['jpeg2dct/common/dctfromjpg.cc']
     common_lib.extra_compile_args = options['COMPILE_FLAGS'] + \
                                    abi_compile_flags
     common_lib.extra_link_args = options['LINK_FLAGS']
     common_lib.library_dirs = options['LIBRARY_DIRS']
-    common_lib.libraries = options['LIBRARIES'] + ['jpeg']
+    common_lib.libraries = options['LIBRARIES'] + ["jpeg"]
 
     build_ext.build_extension(common_lib)
 
@@ -227,13 +349,13 @@ def build_common_extension(build_ext, options, abi_compile_flags):
 def build_numpy_extension(build_ext, options, abi_compile_flags):
     import numpy
     numpy_lib.define_macros = options['MACROS']
-    numpy_lib.include_dirs = options['INCLUDES'] + [numpy.get_include()]
+    numpy_lib.include_dirs = options['INCLUDE_DIRS'] + [numpy.get_include()]
     numpy_lib.sources = options['SOURCES'] + ['jpeg2dct/numpy/dctfromjpg_wrap.cc']
     numpy_lib.extra_compile_args = options['COMPILE_FLAGS'] + \
                                    abi_compile_flags
     numpy_lib.extra_link_args = options['LINK_FLAGS']
     numpy_lib.library_dirs = options['LIBRARY_DIRS']
-    numpy_lib.libraries = options['LIBRARIES']
+    numpy_lib.libraries = options['LIBRARIES'] + ["jpeg"]
 
     build_ext.build_extension(numpy_lib)
 
@@ -244,13 +366,13 @@ def build_tf_extension(build_ext, options):
         build_ext, options['COMPILE_FLAGS'])
 
     tf_lib.define_macros = options['MACROS']
-    tf_lib.include_dirs = options['INCLUDES']
+    tf_lib.include_dirs = options['INCLUDE_DIRS']
     tf_lib.sources = options['SOURCES'] + ['jpeg2dct/tensorflow/tf_lib.cc']
     tf_lib.extra_compile_args = options['COMPILE_FLAGS'] + \
         tf_compile_flags
     tf_lib.extra_link_args = options['LINK_FLAGS'] + tf_link_flags
     tf_lib.library_dirs = options['LIBRARY_DIRS']
-    tf_lib.libraries = options['LIBRARIES']
+    tf_lib.libraries = options['LIBRARIES'] + ["jpeg"]
 
     build_ext.build_extension(tf_lib)
 
